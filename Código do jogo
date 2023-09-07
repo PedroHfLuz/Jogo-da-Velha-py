@@ -1,0 +1,79 @@
+from tkinter import messagebox
+import tkinter as tk
+import tkinter.font as font
+
+
+class Grid(tk.Frame):
+    ultimaJogada = 0
+    teclaVet = None
+    tabuleiro = [[None for _ in range(3)] for _ in range(3)]
+
+    def __init__(self):
+        self.desenharTela()
+
+    def desenharTela(self):
+        tk.Frame.__init__(self, border=1, relief=tk.GROOVE)
+        self.master.title("jogo da velha")
+        self.master.geometry("610x660")
+        formato = 70
+        self.teclaVet = [
+            tk.Button(self.master,text=str(1),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[0])),
+            tk.Button(self.master,text=str(2),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[1])),
+            tk.Button(self.master,text=str(3),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[2])),
+            tk.Button(self.master,text=str(4),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[3])),
+            tk.Button(self.master,text=str(5),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[4])),
+            tk.Button(self.master,text=str(6),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[5])),
+            tk.Button(self.master,text=str(7),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[6])),
+            tk.Button(self.master,text=str(8),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[7])),
+            tk.Button(self.master,text=str(9),border=1,relief=tk.RAISED,padx=15,pady=15,command=lambda: self.processarBotao(self.teclaVet[8])),]
+        indice = 0
+        myFont = font.Font(size=20, weight="bold")
+        for i in range(3):
+            for j in range(3):
+                self.teclaVet[indice]["font"] = myFont
+                self.teclaVet[indice].grid(
+                    row=i, column=j, ipadx=formato, ipady=formato)
+                indice = indice + 1
+
+    def processarBotao(self, btnCli):
+        myFont = font.Font(size=20, weight="bold")
+        linha, coluna = self.obter_posicao_botao(btnCli)
+        texto = btnCli['text']
+        if self.tabuleiro[linha][coluna] is None:
+            texto = "O" if self.ultimaJogada == 0 else "X"
+            btnCli.configure(text=texto, bg="#0052cc" if texto == "O" else "#222222", fg="#ffffff")
+            self.ultimaJogada = 1 - self.ultimaJogada
+            btnCli["font"] = myFont
+            self.tabuleiro[linha][coluna] = texto
+            btnCli["state"] = "disabled"
+            self.validarVencedor()
+
+    def obter_posicao_botao(self, btnCli):
+        for i in range(3):
+            for j in range(3):
+                if self.teclaVet[i * 3 + j] == btnCli:
+                    return i, j
+                
+    def verificar_combinacao(self, comb):
+        return all(self.teclaVet[i]['text'] == self.teclaVet[comb[0]]['text'] and
+                   self.teclaVet[i]['text'] != "" for i in comb)
+
+    def validarVencedor(self):
+        print("Validando campeão")
+        combinacoes_vencedoras = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],  
+            [0, 4, 8], [2, 4, 6]             
+        ]
+
+        for comb in combinacoes_vencedoras:
+            if self.verificar_combinacao(comb):
+                vencedor = self.teclaVet[comb[0]]['text']
+                if vencedor == "O":
+                    messagebox.showinfo("Vencedor", "Jogador O ganhou")
+                else:
+                    messagebox.showinfo("Vencedor", "Jogador X ganhou")
+                return
+
+g = Grid()
+g.mainloop()
